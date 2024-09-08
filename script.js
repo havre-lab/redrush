@@ -3,8 +3,12 @@ const canvas=document.getElementById("game-window");
 const ctx=canvas.getContext("2d");
 
 //constants for easy use instead of string
+const LEVELSBEATEN="levelsbeaten"
+
 const MENU="menu";
+const LEVELSELECT="levelselect";
 const GAMEPLAY="gameplay";
+
 
 
 //constant image and audios
@@ -12,7 +16,8 @@ const menuAssets={
     "mainmenu":document.getElementById("mainmenu"),
     "menutext":document.getElementById("menutext"),
     "soundon":document.getElementById("soundon"),
-    "soundoff":document.getElementById("soundoff")
+    "soundoff":document.getElementById("soundoff"),
+    "levelselect":document.getElementById("levelselect")
 }
 
 const music={
@@ -27,6 +32,8 @@ var menuTextDelay;
 var menuSound;
 
 var events=[];
+var keys=[];
+
 var gameLoopTimer;
 var state;
 var width=canvas.width;
@@ -70,6 +77,11 @@ function menuTick(){
                 }
             
         }
+        if(events[i].type=="keydown"){
+            if(events[i].details.key=="Enter"){
+                startLevelselect()
+            }
+        }
     }
     events=[]
     
@@ -98,8 +110,12 @@ function menuTick(){
     
 }
 
-function gameplayTick(){
+function levelselectTick(){
+    ctx.drawImage(menuAssets.levelselect,0,0,width,height)
+}
 
+function gameplayTick(){
+    
 }
 
 
@@ -113,6 +129,9 @@ function gameLoop(){
     if(state==MENU){
         menuTick();
     }
+    if(state==LEVELSELECT){
+        levelselectTick();
+    }
     if(state==GAMEPLAY){
         gameplayTick;
     }
@@ -120,15 +139,45 @@ function gameLoop(){
 
 
 function startGame(){
+    
+    startMenu()
+    gameLoopTimer=setInterval(gameLoop,1/60)
+}
+
+function startMenu(){
     state=MENU
     menuTextY=-300
     menuTextSpeedY=0
     menuTextDelay=120;
     menuSound=false;
-    gameLoopTimer=setInterval(gameLoop,1/60)
+}
+
+function startLevelselect(){
+    state=LEVELSELECT;
+    music.menu.pause();
 }
 
 
 startGame()
 
 document.addEventListener("mousedown",function(event){events.push({"type":"mousedown","details":event})})
+
+document.addEventListener("keydown",function(event){
+    events.push({"type":"keydown","details":event})
+    if(!keys.includes(event.key)){
+        keys.push(event.key)
+    }
+    
+
+    })
+
+    document.addEventListener("keyup",function(event){
+        events.push({"type":"keyup","details":event})
+        if(keys.includes(event.key)){
+            if(keys.indexOf(event.key)>-1){
+                keys.splice(keys.indexOf(event.key),1)
+            }
+        }
+        
+    
+        })
